@@ -1,0 +1,10 @@
+[class *="icon"] {
+    width: 25px;
+    height: 25px;
+    object-fit: "contain";
+    pointer-events: "none";
+}
+
+.icon-line {
+    transform: rotate(-45deg);
+}

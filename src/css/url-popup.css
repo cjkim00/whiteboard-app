@@ -1,0 +1,6 @@
+.copy-text {
+  transition:
+    opacity 300ms ease,
+    transform 300ms ease;
+  text-align: center;
+}

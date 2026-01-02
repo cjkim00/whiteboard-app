@@ -1,0 +1,1 @@
+export const TYPE_TEXT_TEXTBOX = "TEXT_TEXTBOX";

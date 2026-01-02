@@ -1,0 +1,19 @@
+.toolbar {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+
+  background-color: white;
+
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-content: start;
+  justify-content: center;
+  align-items: center;
+
+  border: 1px solid black;
+  border-radius: 3px;
+  padding: 2px 8px;
+}

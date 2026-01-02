@@ -1,0 +1,20 @@
+.copy-button {
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.copy-button:hover {
+  background-color: #d9d7d7;
+}
+
+.copy-button:active {
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0.05);
+  background-color: #cccaca;
+}

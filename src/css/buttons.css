@@ -1,0 +1,21 @@
+[class *="toolbarButton"] {
+  border: none;
+  background-color: white;
+  padding: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+[class *="toolbarButton"]:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+[class *="toolbarButton"]:active {
+  background-color: rgba(0, 0, 0, 0.16);
+}
+
+[class *="toolbarButton"]:focus-visible {
+  outline: none;
+  background-color: rgba(0, 0, 0, 0.08);
+}
