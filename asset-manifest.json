@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/whiteboard-app/static/css/main.b9efda59.css",
-    "main.js": "/whiteboard-app/static/js/main.7302f885.js",
+    "main.js": "/whiteboard-app/static/js/main.c2d87177.js",
     "static/js/453.4cbc10b7.chunk.js": "/whiteboard-app/static/js/453.4cbc10b7.chunk.js",
     "static/media/undo-arrow-icon.png": "/whiteboard-app/static/media/undo-arrow-icon.decb97f726c620c318fe.png",
     "index.html": "/whiteboard-app/index.html",
     "main.b9efda59.css.map": "/whiteboard-app/static/css/main.b9efda59.css.map",
-    "main.7302f885.js.map": "/whiteboard-app/static/js/main.7302f885.js.map",
+    "main.c2d87177.js.map": "/whiteboard-app/static/js/main.c2d87177.js.map",
     "453.4cbc10b7.chunk.js.map": "/whiteboard-app/static/js/453.4cbc10b7.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.b9efda59.css",
-    "static/js/main.7302f885.js"
+    "static/js/main.c2d87177.js"
   ]
 }
