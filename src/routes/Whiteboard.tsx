@@ -149,7 +149,7 @@ function Whiteboard() {
             setTextBox(textboxMap);
             redraw();
         });
-        
+
         async function init() {
             const response = await fetch("https://whiteboard-app-backend-ts.onrender.com/get-id");
             if (!response) throw new Error("failed to fetch data");
@@ -158,14 +158,13 @@ function Whiteboard() {
             userId.current = data.userId;
             serverId.current = data.serverId;
 
-            const params = new URLSearchParams(window.location.hash);
-            console.log("params: ", params);
-            if (params.size > 0) {
-                serverId.current = params.get("room");
-                socket.emit("connect_to_server", userId.current, serverId.current);
-            } else {
-                socket.emit("connect_to_server", userId.current, serverId.current);
+            const roomFromUrl = getRoomParamFromHash();
+
+            if (roomFromUrl) {
+                serverId.current = roomFromUrl;
             }
+
+            socket.emit("connect_to_server", userId.current, serverId.current);
 
             setSize({ width: window.innerWidth, height: window.innerHeight });
         }
@@ -212,6 +211,16 @@ function Whiteboard() {
         canvas.addEventListener("wheel", onWheel, { passive: false });
         return () => canvas.removeEventListener("wheel", onWheel);
     }, []);
+
+    function getRoomParamFromHash(): string | null {
+        const hash = window.location.hash; // example: "#/?room=ABC" or "#/board?room=ABC"
+        const queryStartIndex = hash.indexOf("?");
+        if (queryStartIndex === -1) return null;
+
+        const queryString = hash.slice(queryStartIndex + 1); // "room=ABC"
+        const params = new URLSearchParams(queryString);
+        return params.get("room");
+    }
 
     function clampNumber(value: number, min: number, max: number) {
         if (value < min) return min;
@@ -599,7 +608,7 @@ function Whiteboard() {
                     onMouseMove={handleMouseMove}
                     onMouseUp={handleMouseUp}
                 />
-                
+
                 <ShareBoard getRoomURL={getRoomURL} />
 
                 <Toolbar
