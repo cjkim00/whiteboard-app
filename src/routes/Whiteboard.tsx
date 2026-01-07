@@ -1,21 +1,22 @@
+// Whiteboard.tsx
 import React, { useRef, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { DrawObject } from "../interface/drawObject";
 import { point } from "../interface/point";
 import UrlPopup from "./Share/UrlPopup";
 import { drawShapeRectangle } from "../util/DrawShapes";
-import Textbox from "./TextBox";
+import Textbox from "./TextBox/TextBox";
 import { TextBoxDrawObject } from "../interface/drawObject";
 import { nanoid } from "nanoid";
 import Toolbar from "./Toolbar/Toolbar";
 import ShareBoard from "./Share/ShareBoard";
+import Avatar from "./UserList/Avatar";
 import { drawLineFreehand, drawLineStraight } from "../util/DrawLines";
 import { drawTextbox } from "../util/DrawTextbox";
 import "../css/buttons.css";
 import "../css/whiteboard.css";
 
 function Whiteboard() {
-    console.log("Whiteboard rendered");
     // Identity and networking
     const userId = useRef<string>("");
     const serverId = useRef<string | null>(null);
@@ -23,10 +24,7 @@ function Whiteboard() {
 
     // Canvas element and UI sizing
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const [size, setSize] = useState({
-        width: 0,
-        height: 0
-    });
+    const [size, setSize] = useState({ width: 0, height: 0 });
 
     // Share popup UI
     const roomURL = useRef<string | null>(null);
@@ -36,20 +34,18 @@ function Whiteboard() {
     const isDrawing = useRef(false);
     const lastPoint = useRef<{ x: number; y: number }>(null);
     const startingPoint = useRef<point | null>(null);
-    //const [okayToDraw, setOkayToDraw] = useState(false);
 
     // Draw stacks and current tool object
     const drawObjectArray = useRef<DrawObject[]>([]);
     const drawObjectMap = useRef<Map<string, DrawObject>>(new Map<string, DrawObject>());
     const currentDrawObject = useRef<DrawObject>({
-        type: "TYPE_LINE_FREEHAND",
+        type: "TYPE_NONE",
         size: 3,
         color: "#000000",
-        points: [],
         id: nanoid()
     });
 
-    // Textboxes (UI state, since you render components from it)
+    // Textboxes state
     const [textBoxArray, setTextBox] = useState<Map<string, TextBoxDrawObject> | null>(
         new Map<string, TextBoxDrawObject>()
     );
@@ -128,7 +124,6 @@ function Whiteboard() {
                     textboxMap.set(box.id, box);
                     continue;
                 }
-
                 drawObjectMap.current.set(obj.id, obj);
             }
 
@@ -148,87 +143,16 @@ function Whiteboard() {
                     textboxMap.set(box.id, box);
                     continue;
                 }
-
                 drawObjectMap.current.set(obj.id, obj);
             }
 
             setTextBox(textboxMap);
             redraw();
         });
-
-        socket.on("text_box_font_size_update", (objectId: string, newFontSize: number) => {
-            console.log(newFontSize);
-            setTextBox((prev) => {
-                if (!prev) return prev;
-                const next = new Map(prev);
-                const textbox = next.get(objectId);
-                if (!textbox) return prev;
-
-                next.set(objectId, {
-                    ...textbox,
-                    fontSize: newFontSize
-                });
-                return next;
-            });
-        });
-
-        socket.on("text_box_text_update", (objectId, newText) => {
-            setTextBox((prev) => {
-                if (!prev) return prev;
-                const next = new Map(prev);
-                const textbox = next.get(objectId);
-                if (!textbox) return prev;
-
-                next.set(objectId, {
-                    ...textbox,
-                    text: newText
-                });
-                return next;
-            });
-        });
-
-        socket.on("text_box_size_update", (objectId, width, height) => {
-            console.log("object id: ", objectId, " width: ", width, " height: ", height);
-            setTextBox((prev) => {
-                if (!prev) return prev;
-
-                const next = new Map(prev);
-                const box = next.get(objectId);
-                if (!box) return prev;
-
-                next.set(objectId, {
-                    ...box,
-                    width,
-                    height
-                });
-
-                return next;
-            });
-        });
-
-        socket.on("text_box_location_update", (objectId, newX, newY) => {
-
-            setTextBox((prev) => {
-                if (!prev) return prev;
-
-                const next = new Map(prev);
-                const box = next.get(objectId);
-                if (!box) return prev;
-
-                next.set(objectId, {
-                    ...box,
-                    location: { x: newX, y: newY }
-                });
-
-                return next;
-            });
-        });
-
+        
         async function init() {
             const response = await fetch("http://localhost:3001/get-id");
-            if (!response) {
-                throw new Error("failed to fetch data");
-            }
+            if (!response) throw new Error("failed to fetch data");
             const data = await response.json();
 
             userId.current = data.userId;
@@ -242,10 +166,7 @@ function Whiteboard() {
                 socket.emit("connect_to_server", userId.current, serverId.current);
             }
 
-            setSize({
-                width: window.innerWidth,
-                height: window.innerHeight
-            });
+            setSize({ width: window.innerWidth, height: window.innerHeight });
         }
 
         init();
@@ -274,16 +195,15 @@ function Whiteboard() {
             const worldX = (mouseX - oldOffset.x) / oldScale;
             const worldY = (mouseY - oldOffset.y) / oldScale;
 
-            let nextScale =
-                e.deltaY < 0 ? oldScale * zoomFactor : oldScale / zoomFactor;
-
+            let nextScale = e.deltaY < 0 ? oldScale * zoomFactor : oldScale / zoomFactor;
             nextScale = clampNumber(nextScale, 0.2, 5);
 
             cameraScaleRef.current = nextScale;
             cameraOffsetRef.current = {
                 x: mouseX - worldX * nextScale,
-                y: mouseY - worldY * nextScale,
+                y: mouseY - worldY * nextScale
             };
+
             syncCameraView();
             redraw();
         }
@@ -307,10 +227,7 @@ function Whiteboard() {
         const scale = cameraScaleRef.current;
         const offset = cameraOffsetRef.current;
 
-        return {
-            x: (screenX - offset.x) / scale,
-            y: (screenY - offset.y) / scale
-        };
+        return { x: (screenX - offset.x) / scale, y: (screenY - offset.y) / scale };
     }
 
     function getWorldPos(e: React.MouseEvent<HTMLCanvasElement>): point {
@@ -329,6 +246,8 @@ function Whiteboard() {
     }
 
     function handleMouseDown(e: React.MouseEvent<HTMLCanvasElement>) {
+        if (currentDrawObject.current.type === "TYPE_NONE") return;
+
         if (e.button === 2) {
             isPanningRef.current = true;
             panStartMouseRef.current = { x: e.clientX, y: e.clientY };
@@ -337,10 +256,10 @@ function Whiteboard() {
         }
 
         const start = getWorldPos(e);
-        //setOkayToDraw(true);
 
         if (currentDrawObject.current.type === "TYPE_TEXT_TEXTBOX") {
             const newId = nanoid();
+
             const newTextbox: TextBoxDrawObject = {
                 type: "TYPE_TEXT_TEXTBOX",
                 color: currentDrawObject.current.color,
@@ -353,6 +272,8 @@ function Whiteboard() {
                 id: newId
             };
 
+            drawObjectArray.current.push(newTextbox);
+
             setTextBox((prev) => {
                 const next = new Map(prev ?? undefined);
                 next.set(newId, newTextbox);
@@ -361,10 +282,7 @@ function Whiteboard() {
 
             currentDrawObject.current = newTextbox;
 
-            if (socketRef.current) {
-                socketRef.current.emit("draw_object", userId.current, serverId.current, currentDrawObject.current);
-            }
-
+            socketRef.current?.emit("draw_object", userId.current, serverId.current, newTextbox);
             return;
         }
 
@@ -377,6 +295,8 @@ function Whiteboard() {
     }
 
     function handleMouseMove(e: React.MouseEvent<HTMLCanvasElement>) {
+        if (currentDrawObject.current.type === "TYPE_NONE") return;
+
         if (isPanningRef.current) {
             const startMouse = panStartMouseRef.current;
             const startOffset = panStartOffsetRef.current;
@@ -386,6 +306,7 @@ function Whiteboard() {
                 x: startOffset.x + (e.clientX - startMouse.x),
                 y: startOffset.y + (e.clientY - startMouse.y)
             };
+
             syncCameraView();
             redraw();
             return;
@@ -403,7 +324,6 @@ function Whiteboard() {
         }
 
         lastPoint.current = pos;
-
         const currentPos: point = { x: pos.x, y: pos.y };
 
         if (currentDrawObject.current.type === "TYPE_LINE_FREEHAND") {
@@ -420,14 +340,14 @@ function Whiteboard() {
     }
 
     function handleMouseUp(e: React.MouseEvent<HTMLCanvasElement>) {
+        if (currentDrawObject.current.type === "TYPE_NONE") return;
+
         if (e.button === 2) {
             isPanningRef.current = false;
             panStartMouseRef.current = null;
             panStartOffsetRef.current = null;
             return;
         }
-
-        //setOkayToDraw(false);
 
         isDrawing.current = false;
         lastPoint.current = null;
@@ -440,13 +360,13 @@ function Whiteboard() {
             startingPoint.current!,
             currentPosition
         );
-        
+
         if (currentDrawObject.current.type !== "TYPE_TEXT_TEXTBOX") {
             drawObjectArray.current.push(currentDrawObject.current);
             drawObjectMap.current.set(currentDrawObject.current.id, currentDrawObject.current);
             socketRef.current?.emit("draw_object", userId.current, serverId.current, currentDrawObject.current);
         }
-        
+
         if (currentDrawObject.current.type === "TYPE_LINE_FREEHAND") {
             currentDrawObject.current = {
                 type: "TYPE_LINE_FREEHAND",
@@ -477,7 +397,6 @@ function Whiteboard() {
                 id: nanoid()
             };
         }
-
     }
 
     function clearCanvas() {
@@ -502,39 +421,48 @@ function Whiteboard() {
         ctx.setTransform(scale, 0, 0, scale, offset.x, offset.y);
 
         for (const obj of drawObjectMap.current.values()) {
-            if (obj.type === "TYPE_TEXT_TEXTBOX") continue;
+            if (obj.type === "TYPE_TEXT_TEXTBOX" || obj.type === "TYPE_NONE") continue;
             const handler = map[obj.type]();
             handler.draw(ctx, obj);
         }
     }
 
     function undo() {
-        if (socketRef.current) {
-            const objectId = drawObjectArray.current.pop()?.id;
-            socketRef.current.emit("remove_object", userId.current, serverId.current, objectId);
+        if (!socketRef.current) return;
 
-            setTextBox((prev) => {
-                if (!prev) return prev;
-                const next = new Map(prev);
-                next.delete(objectId!);
-                return next;
-            });
-        }
+        const objectId = drawObjectArray.current.pop()?.id;
+        socketRef.current.emit("remove_object", userId.current, serverId.current, objectId);
+
+        setTextBox((prev) => {
+            if (!prev) return prev;
+            const next = new Map(prev);
+            if (objectId) next.delete(objectId);
+            return next;
+        });
     }
 
     function draw(drawObject: DrawObject) {
+        if (drawObject.type === "TYPE_NONE") return;
         const ctx = getCtxWithCameraTransform();
         const handler = map[drawObject.type]();
         handler.draw(ctx, drawObject);
     }
 
     function createServer() {
-        if (socketRef.current) {
-            socketRef.current.emit("create_room", userId.current);
-        }
+        socketRef.current?.emit("create_room", userId.current);
     }
 
     function changeDrawTypeToStraightLine() {
+        if (currentDrawObject.current.type === "TYPE_LINE_STRAIGHT") {
+            currentDrawObject.current = {
+                type: "TYPE_NONE",
+                size: 3,
+                color: "#000000",
+                id: nanoid()
+            };
+            return;
+        }
+
         currentDrawObject.current = {
             type: "TYPE_LINE_STRAIGHT",
             color: currentDrawObject.current.color,
@@ -546,6 +474,16 @@ function Whiteboard() {
     }
 
     function changeDrawTypeToFreehandLine() {
+        if (currentDrawObject.current.type === "TYPE_LINE_FREEHAND") {
+            currentDrawObject.current = {
+                type: "TYPE_NONE",
+                size: 3,
+                color: "#000000",
+                id: nanoid()
+            };
+            return;
+        }
+
         currentDrawObject.current = {
             type: "TYPE_LINE_FREEHAND",
             color: currentDrawObject.current.color,
@@ -556,6 +494,16 @@ function Whiteboard() {
     }
 
     function changeDrawTypeToRectangleShape() {
+        if (currentDrawObject.current.type === "TYPE_SHAPE_RECTANGLE") {
+            currentDrawObject.current = {
+                type: "TYPE_NONE",
+                size: 3,
+                color: "#000000",
+                id: nanoid()
+            };
+            return;
+        }
+
         currentDrawObject.current = {
             type: "TYPE_SHAPE_RECTANGLE",
             color: currentDrawObject.current.color,
@@ -567,6 +515,16 @@ function Whiteboard() {
     }
 
     function changeDrawTypeToTextbox() {
+        if (currentDrawObject.current.type === "TYPE_TEXT_TEXTBOX") {
+            currentDrawObject.current = {
+                type: "TYPE_NONE",
+                size: 3,
+                color: "#000000",
+                id: nanoid()
+            };
+            return;
+        }
+
         currentDrawObject.current = {
             type: "TYPE_TEXT_TEXTBOX",
             color: currentDrawObject.current.color,
@@ -594,12 +552,9 @@ function Whiteboard() {
             const response = await fetch(
                 `http://localhost:3001/get-room-url?userId=${encodeURIComponent(userId.current)}`
             );
-            if (!response.ok) {
-                throw new Error(`server error: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`server error: ${response.status}`);
             const data = await response.json();
             roomURL.current = data.url;
-            console.log("url: ", data.url);
             setPopupState(true);
         } catch (err) {
             console.log("error connecting to server: ", err);
@@ -614,22 +569,15 @@ function Whiteboard() {
     }
 
     return (
-        <div
-            style={{
-                position: "relative",
-                width: size.width,
-                height: size.height
-
-            }}
-        >
-            {showPopup &&
+        <div style={{ position: "relative", width: size.width, height: size.height }}>
+            {showPopup && (
                 <UrlPopup
                     url={roomURL.current!}
                     width={size.width}
                     height={size.height}
                     setPopupState={setPopupState}
                 />
-            }
+            )}
 
             <div>
                 <canvas
@@ -640,9 +588,9 @@ function Whiteboard() {
                     style={{
                         backgroundColor: "#ffffff",
                         backgroundImage: `
-                        linear-gradient(#e0e0e0 1px, transparent 1px),
-                        linear-gradient(90deg, #e0e0e0 1px, transparent 1px)
-                    `,
+              linear-gradient(#e0e0e0 1px, transparent 1px),
+              linear-gradient(90deg, #e0e0e0 1px, transparent 1px)
+            `,
                         backgroundSize: "25px 25px"
                     }}
                     onContextMenu={(e) => e.preventDefault()}
@@ -650,7 +598,7 @@ function Whiteboard() {
                     onMouseMove={handleMouseMove}
                     onMouseUp={handleMouseUp}
                 />
-
+                
                 <ShareBoard getRoomURL={getRoomURL} />
 
                 <Toolbar
@@ -662,6 +610,11 @@ function Whiteboard() {
                     TextboxButtonOnClick={changeDrawTypeToTextbox}
                     ColorPickerOnColorChange={changeColor}
                 />
+                {/*
+                <div style={{ display: "flex", left: 20, bottom: 20, position: "absolute" }}>
+                    <Avatar name="Chris" />
+                </div>
+                */}
 
                 {Array.from(textBoxArray?.values() ?? []).map((box) => (
                     <Textbox
@@ -685,8 +638,6 @@ function Whiteboard() {
                     />
                 ))}
             </div>
-
-
         </div>
     );
 }

@@ -110,7 +110,7 @@ export function drawLineStraight() {
             if (drawObject.type !== "TYPE_LINE_STRAIGHT") {
                 return;
             }
-            console.log("Straight Line: ", drawObject);
+            //console.log("Straight Line: ", drawObject);
             ctx.beginPath();
             ctx.moveTo(drawObject.start.x, drawObject.start.y);
             ctx.lineTo(drawObject.end.x, drawObject.end.y);

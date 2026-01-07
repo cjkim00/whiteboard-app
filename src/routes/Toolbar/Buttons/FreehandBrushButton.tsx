@@ -1,19 +1,24 @@
+import React from "react";
 import freehandButtonIcon from "../../../icons/brush-paintbrush-icon.png";
 import "../../../css/buttons.css";
 import "../../../css/icons.css";
+
 type FreehandButtonProps = {
     OnClick: () => void;
+    isActive: boolean;
 };
-export default function FreehandBrushButton({ OnClick }: FreehandButtonProps) {
+
+export default function FreehandBrushButton({ OnClick, isActive }: FreehandButtonProps) {
     return (
-        <div>
-            <button
-                className="toolbarButton-freehand"
-                onClick={OnClick}
-            >
-                <img
-                    className="icon-freehand"
-                    src={freehandButtonIcon} /></button>
-        </div>
-    )
+        <button
+            style={{
+                backgroundColor: isActive ? "#4caf50" : "transparent"
+            }}
+            className={`toolbarButton-freehand${isActive ? " active" : ""}`}
+            onClick={OnClick}
+            type="button"
+        >
+            <img className="icon" src={freehandButtonIcon} />
+        </button>
+    );
 }

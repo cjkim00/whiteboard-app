@@ -1,6 +1,6 @@
 // TextAreaBox.tsx
 import React, { ChangeEvent, useEffect, useRef } from "react";
-import { TextBoxDrawObject } from "../interface/drawObject";
+import { TextBoxDrawObject } from "../../interface/drawObject";
 import { Socket } from "socket.io-client";
 
 type TextAreaProps = {
@@ -44,13 +44,6 @@ export default function TextArea({
 			setTextBox(textBox.id, { ...textBox, text: newText });
 		}
 	}
-
-
-	useEffect(() => {
-		if (!hasInitializedSizeRef.current) {
-			lastSentSizeRef.current = { w: textBox.width, h: textBox.height };
-		}
-	}, [textBox.id, textBox.width, textBox.height]);
 
 	useEffect(() => {
 		const box = textboxRef.current;

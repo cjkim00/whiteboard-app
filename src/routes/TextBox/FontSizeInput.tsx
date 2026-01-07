@@ -1,6 +1,6 @@
 // FontSizeInput.tsx
 import React, { ChangeEvent, useRef } from "react";
-import { TextBoxDrawObject } from "../interface/drawObject";
+import { TextBoxDrawObject } from "../../interface/drawObject";
 import { Socket } from "socket.io-client";
 
 type FontSizeInputProps = {

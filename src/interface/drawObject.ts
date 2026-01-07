@@ -5,6 +5,7 @@ export type DrawObject =
   | LineStraightDrawObject
   | ShapeRectangleDrawObject
   | TextBoxDrawObject
+  | None
 
 export type LineFreehandDrawObject = {
   type: "TYPE_LINE_FREEHAND"
@@ -41,5 +42,12 @@ export type TextBoxDrawObject = {
   height: number,
   width: number
   fontSize: number
+  id: string
+}
+
+export type None = {
+  type: "TYPE_NONE"
+  color: string
+  size: number
   id: string
 }
