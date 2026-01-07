@@ -158,7 +158,7 @@ function Whiteboard() {
             userId.current = data.userId;
             serverId.current = data.serverId;
 
-            const params = new URLSearchParams(window.location.search);
+            const params = new URLSearchParams(window.location.hash);
             console.log("params: ", params);
             if (params.size > 0) {
                 serverId.current = params.get("room");
