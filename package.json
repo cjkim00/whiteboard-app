@@ -2,7 +2,7 @@
   "name": "whiteboard-app",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://cjkim00.github.io/whiteboard-app",
+  "homepage": "https://cjkim00.github.io/whiteboard-app/",
   "dependencies": {
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
