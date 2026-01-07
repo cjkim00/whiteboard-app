@@ -159,6 +159,7 @@ function Whiteboard() {
             serverId.current = data.serverId;
 
             const params = new URLSearchParams(window.location.search);
+            console.log("params: ", params);
             if (params.size > 0) {
                 serverId.current = params.get("room");
                 socket.emit("connect_to_server", userId.current, serverId.current);
