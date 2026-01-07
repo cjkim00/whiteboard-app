@@ -72,7 +72,7 @@ function Whiteboard() {
     };
 
     useEffect(() => {
-        const socket = io("http://localhost:3001");
+        const socket = io("https://whiteboard-app-backend-ts.onrender.com");
         socketRef.current = socket;
 
         socket.on("room_created", (roomId: string) => {
@@ -151,7 +151,7 @@ function Whiteboard() {
         });
         
         async function init() {
-            const response = await fetch("http://localhost:3001/get-id");
+            const response = await fetch("https://whiteboard-app-backend-ts.onrender.com/get-id");
             if (!response) throw new Error("failed to fetch data");
             const data = await response.json();
 
@@ -550,7 +550,7 @@ function Whiteboard() {
         try {
             createServer();
             const response = await fetch(
-                `http://localhost:3001/get-room-url?userId=${encodeURIComponent(userId.current)}`
+                `https://whiteboard-app-backend-ts.onrender.com/get-room-url?userId=${encodeURIComponent(userId.current)}`
             );
             if (!response.ok) throw new Error(`server error: ${response.status}`);
             const data = await response.json();
